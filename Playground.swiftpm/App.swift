@@ -5,21 +5,23 @@ import DAWNText
 struct App: SwiftUI.App {
     var body: some Scene {
         WindowGroup {
-            List {
-                DAWN.Text("Hello, World!!")
-                DAWN.Text("in List")
-                VStack {
+            NavigationView {
+                List {
                     DAWN.Text("Hello, World!!")
-                    DAWN.Text("in VStack")
-                }
-                HStack {
-                    DAWN.Text("Hello, World!!")
-                    DAWN.Text("in HStack")
-                }
-                
-                DAWN.Text(attributedString)
-                
-                DAWN.Text(nsAttributedString)
+                    DAWN.Text("in List")
+                    VStack {
+                        DAWN.Text("Hello, World!!")
+                        DAWN.Text("in VStack")
+                    }
+                    HStack {
+                        DAWN.Text("Hello, World!!")
+                        DAWN.Text("in HStack")
+                    }
+                    
+                    DAWN.Text(attributedString)
+                    
+                    DAWN.Text(nsAttributedString)
+                }.navigationTitle("DAWNText")
             }
         }
     }
@@ -28,7 +30,9 @@ struct App: SwiftUI.App {
         try! AttributedString(
             markdown: """
             **Markdown** is *easy* syntax.
-            """
+            [Link to Apple](https://apple.com)
+            """,
+            options: .init(interpretedSyntax: .inlineOnlyPreservingWhitespace)
         )
     }
     
