@@ -24,3 +24,7 @@ DAWN.Text("Hello, World!!")
 - [x] lineLimit
 - [x] selection mode
 - [x] extra menu actions
+
+# LICENSE
+
+MIT
