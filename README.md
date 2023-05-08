@@ -3,7 +3,9 @@
 
 The text rendering component like SwiftUI's Text.
 
-<img src="https://github.com/noppefoxwolf/DAWNText/blob/main/.github/Screenshot1.png" width="300">
+|||
+|---|---|
+| <img src="https://github.com/noppefoxwolf/DAWNText/blob/main/.github/Screenshot1.png" width="300"> | <img src="https://github.com/noppefoxwolf/DAWNText/blob/main/.github/Screenshot2.jpeg" width="300"> |
 
 # Usage
 
