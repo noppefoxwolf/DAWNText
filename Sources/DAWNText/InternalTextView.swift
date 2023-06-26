@@ -11,33 +11,6 @@ struct InternalTextView: UIViewRepresentable {
 
     let attributedString: AttributedString
 
-    @Environment(\.extraActions)
-    var extraActions
-
-    @Environment(\.selectionMode)
-    var selectionMode
-
-    @Environment(\.uiFont)
-    var font
-
-    @Environment(\.openURL)
-    var openURLAction
-
-    @Environment(\.lineLimit)
-    var lineLimit
-
-    @Environment(\.lineBreakMode)
-    var lineBreakMode
-
-    @Environment(\.lineFragmentPadding)
-    var lineFragmentPadding
-
-    @Environment(\.uiforegroundColor)
-    var uiforegroundColor
-
-    @Environment(\.textAlignment)
-    var textAlignment
-
     func makeUIView(context: Context) -> UIKitTextView {
         let textView = UIKitTextView(usingTextLayoutManager: true)
         textView.backgroundColor = .clear
@@ -57,20 +30,31 @@ struct InternalTextView: UIViewRepresentable {
     }
 
     func updateUIView(_ textView: UIKitTextView, context: Context) {
-        textView.extraActions = extraActions
-
-        var attributedString = attributedString
-        attributedString.foregroundColor = uiforegroundColor ?? .label
-        attributedString.font = font ?? .preferredFont(forTextStyle: .body)
+        textView.extraActions = context.environment.extraActions
+        
+        let foregroundColor = context.environment.uiforegroundColor ?? .label
+        let font = context.environment.uiFont ?? .preferredFont(forTextStyle: .body)
+        let lineLimit = context.environment.lineLimit ?? 0
+        let lineBreakMode = context.environment.lineBreakMode ?? .byWordWrapping
+        let lineFragmentPadding = context.environment.lineFragmentPadding ?? 0
+        let selectionMode = context.environment.selectionMode
+        
         let paragraphStyle = NSMutableParagraphStyle()
-        paragraphStyle.alignment = textAlignment
+        paragraphStyle.alignment = context.environment.textAlignment
+        
+        var attributedString = attributedString
+        attributedString.foregroundColor = foregroundColor
+        attributedString.font = font
         attributedString.paragraphStyle = paragraphStyle
         textView.attributedText = NSAttributedString(attributedString)
-        textView.textLayoutManager?.textContainer?.maximumNumberOfLines = lineLimit ?? 0
-        textView.textLayoutManager?.textContainer?.lineBreakMode = lineBreakMode ?? .byWordWrapping
-        textView.textLayoutManager?.textContainer?.lineFragmentPadding = lineFragmentPadding ?? 0
+        
+        textView.textLayoutManager?.textContainer?.maximumNumberOfLines = lineLimit
+        textView.textLayoutManager?.textContainer?.lineBreakMode = lineBreakMode
+        textView.textLayoutManager?.textContainer?.lineFragmentPadding = lineFragmentPadding
         textView.selectionMode = selectionMode
         textView.isSelectable = selectionMode != .none
+        
+        context.coordinator.openURLAction = context.environment.openURL
     }
 
     func sizeThatFits(_ proposal: ProposedViewSize, uiView: UIKitTextView, context: Context)
@@ -96,23 +80,18 @@ struct InternalTextView: UIViewRepresentable {
     }
 
     func makeCoordinator() -> Coordinator {
-        Coordinator(self)
+        Coordinator()
     }
 
     class Coordinator: NSObject, UITextViewDelegate {
 
-        let openURLAction: OpenURLAction
+        var openURLAction: OpenURLAction? = nil
 
         struct CacheKey: Hashable {
             let width: Double
             let attributedString: AttributedString
         }
         var cache: [CacheKey: CGSize] = [:]
-
-        init(_ base: InternalTextView) {
-            self.openURLAction = base.openURLAction
-            super.init()
-        }
 
         // https://stackoverflow.com/a/4338011/1131587
         func textView(
@@ -123,7 +102,7 @@ struct InternalTextView: UIViewRepresentable {
         ) -> Bool {
             switch interaction {
             case .invokeDefaultAction:
-                openURLAction(URL)
+                openURLAction?(URL)
                 return false
             case .presentActions, .preview:
                 return true
