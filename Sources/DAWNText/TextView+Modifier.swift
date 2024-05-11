@@ -1,6 +1,5 @@
 import Foundation
 import SwiftUI
-import UIKit
 
 private struct LineBreakModeKey: EnvironmentKey {
     static let defaultValue: NSLineBreakMode? = nil
@@ -15,17 +14,17 @@ extension EnvironmentValues {
 
 extension View {
     @ViewBuilder
-    func lineBreakMode(_ mode: NSLineBreakMode?) -> some View {
+    public func lineBreakMode(_ mode: NSLineBreakMode?) -> some View {
         environment(\.lineBreakMode, mode)
     }
 }
 
 private struct UIFontKey: EnvironmentKey {
-    static let defaultValue: UIFont? = nil
+    static let defaultValue: UIFont = .preferredFont(forTextStyle: .body)
 }
 
 extension EnvironmentValues {
-    public var uiFont: UIFont? {
+    public var uiFont: UIFont {
         get { self[UIFontKey.self] }
         set { self[UIFontKey.self] = newValue }
     }
@@ -33,7 +32,7 @@ extension EnvironmentValues {
 
 extension View {
     @ViewBuilder
-    func uiFont(_ font: UIFont?) -> some View {
+    public func uiFont(_ font: UIFont) -> some View {
         environment(\.uiFont, font)
     }
 }
@@ -57,11 +56,11 @@ extension View {
 }
 
 private struct UIForegroundColorKey: EnvironmentKey {
-    static let defaultValue: UIColor? = nil
+    static let defaultValue: UIColor = .label
 }
 
 extension EnvironmentValues {
-    public var uiforegroundColor: UIColor? {
+    public var uiforegroundColor: UIColor {
         get { self[UIForegroundColorKey.self] }
         set { self[UIForegroundColorKey.self] = newValue }
     }
@@ -69,12 +68,12 @@ extension EnvironmentValues {
 
 extension View {
     @ViewBuilder
-    public func uiforegroundColor(_ uiforegroundColor: UIColor?) -> some View {
+    public func uiforegroundColor(_ uiforegroundColor: UIColor) -> some View {
         environment(\.uiforegroundColor, uiforegroundColor)
     }
 }
 
-public enum SelectionMode {
+public enum SelectionMode: Sendable {
     case all
     case linkOnly
     case none
@@ -113,23 +112,5 @@ extension View {
     @ViewBuilder
     public func extraActions(_ extraActions: [UIAction]) -> some View {
         environment(\.extraActions, extraActions)
-    }
-}
-
-private struct TextAlignmentKey: EnvironmentKey {
-    static let defaultValue: NSTextAlignment = .natural
-}
-
-extension EnvironmentValues {
-    public var textAlignment: NSTextAlignment {
-        get { self[TextAlignmentKey.self] }
-        set { self[TextAlignmentKey.self] = newValue }
-    }
-}
-
-extension View {
-    @ViewBuilder
-    public func textAlignment(_ textAlignment: NSTextAlignment) -> some View {
-        environment(\.textAlignment, textAlignment)
     }
 }
