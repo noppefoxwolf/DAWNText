@@ -11,7 +11,7 @@ public final class AnyCache<Key: Hashable, Value>: Cache {
     let getter: (Key) -> Value?
     let setter: (Key, Value?) -> Void
     
-    init<T>(base: T) where T: Cache, T.Key == Key, T.Value == Value {
+    public init<T>(base: T) where T: Cache, T.Key == Key, T.Value == Value {
         getter = { base[$0] }
         setter = { base[$0] = $1 }
     }
