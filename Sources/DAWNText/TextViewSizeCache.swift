@@ -1,4 +1,3 @@
-import Cache
 import Foundation
 import SwiftUI
 
@@ -8,10 +7,10 @@ public struct TextViewSizeCacheKey: Hashable {
     let fontHashValue: Int
 }
 
-public typealias TextViewSizeCache = Cache<TextViewSizeCacheKey, CGSize>
+public typealias TextViewSizeCache = AnyCache<TextViewSizeCacheKey, CGSize>
 
 private struct TextViewSizeCacheEnvironmentKey: EnvironmentKey {
-    static let defaultValue: TextViewSizeCache = TextViewSizeCache()
+    static let defaultValue: TextViewSizeCache = TextViewSizeCache(base: OnMemoryCache())
 }
 
 extension EnvironmentValues {
