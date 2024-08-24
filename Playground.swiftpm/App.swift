@@ -7,20 +7,20 @@ struct App: SwiftUI.App {
         WindowGroup {
             NavigationView {
                 List {
-                    DAWN.Text("Hello, World!!")
-                    DAWN.Text("in List")
+                    TextView("Hello, World!!")
+                    TextView("in List")
                     VStack {
-                        DAWN.Text("Hello, World!!")
-                        DAWN.Text("in VStack")
+                        TextView("Hello, World!!")
+                        TextView("in VStack")
                     }
                     HStack {
-                        DAWN.Text("Hello, World!!")
-                        DAWN.Text("in HStack")
+                        TextView("Hello, World!!")
+                        TextView("in HStack")
                     }
                     
-                    DAWN.Text(attributedString)
+                    TextView(attributedString)
                     
-                    DAWN.Text(nsAttributedString)
+                    TextView(nsAttributedString)
                 }.navigationTitle("DAWNText")
             }
         }
