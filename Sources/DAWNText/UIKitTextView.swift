@@ -123,7 +123,8 @@ public final class UIKitTextView: UITextView {
     
     public override func copy(_ sender: Any?) {
         if let onCopy {
-            onCopy(attributedText)
+            let selectedText = attributedText.attributedSubstring(from: selectedRange)
+            onCopy(selectedText)
         } else {
             super.copy(sender)
         }
