@@ -82,6 +82,10 @@ struct InternalTextView: UIViewRepresentable {
             context.environment.lineFragmentPadding ?? 0
         textView.selectionMode = context.environment.selectionMode
         textView.isSelectable = context.environment.selectionMode != .none
+        textView.onCopy = context.environment.onCppy.map { action in
+            { action(AttributedString($0)) }
+        }
+        
 
         if context.environment.selectionMode != .all {
             // Lightweight hack
@@ -144,7 +148,6 @@ struct InternalTextView: UIViewRepresentable {
             @unknown default:
                 return nil
             }
-
         }
     }
 }

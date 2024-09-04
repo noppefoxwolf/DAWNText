@@ -114,3 +114,23 @@ extension View {
         environment(\.extraActions, extraActions)
     }
 }
+
+public typealias OnCopy = (AttributedString) -> Void
+
+private struct OnCopyKey: EnvironmentKey {
+    static var defaultValue: OnCopy? { nil }
+}
+
+extension EnvironmentValues {
+    public var onCppy: OnCopy? {
+        get { self[OnCopyKey.self] }
+        set { self[OnCopyKey.self] = newValue }
+    }
+}
+
+extension View {
+    @ViewBuilder
+    public func onCopy(_ action: @escaping OnCopy) -> some View {
+        environment(\.onCppy, action)
+    }
+}

@@ -4,6 +4,7 @@ import os
 public final class UIKitTextView: UITextView {
     var extraActions: [UIAction] = []
     var selectionMode: SelectionMode = .all
+    var onCopy: ((NSAttributedString) -> Void)? = nil
 
     // workaround: When use init(usingTextLayoutManager:), property always return false.
     // Computed property is OK.
@@ -117,6 +118,14 @@ public final class UIKitTextView: UITextView {
             return attributedText.attribute(.link, at: startIndex, effectiveRange: nil) != nil
         case .none:
             return false
+        }
+    }
+    
+    public override func copy(_ sender: Any?) {
+        if let onCopy {
+            onCopy(attributedText)
+        } else {
+            super.copy(sender)
         }
     }
 }
