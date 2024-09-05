@@ -134,3 +134,29 @@ extension View {
         environment(\.onCppy, action)
     }
 }
+
+private struct OnTapTextItemTagActionKey: EnvironmentKey {
+    static var defaultValue: OnTapTextItemTagAction? { nil }
+}
+
+extension EnvironmentValues {
+    public var onTapTextItemTagAction: OnTapTextItemTagAction? {
+        get { self[OnTapTextItemTagActionKey.self] }
+        set { self[OnTapTextItemTagActionKey.self] = newValue }
+    }
+}
+
+extension View {
+    @ViewBuilder
+    public func onTapTextItemTag(_ action: @escaping (String) -> Void) -> some View {
+        environment(\.onTapTextItemTagAction, OnTapTextItemTagAction(action: action))
+    }
+}
+
+public struct OnTapTextItemTagAction: Sendable {
+    let action: (String) -> Void
+    
+    func callAsFunction(_ textItemTag: String) {
+        action(textItemTag)
+    }
+}

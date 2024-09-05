@@ -57,6 +57,7 @@ struct InternalTextView: UIViewRepresentable {
 
         // https://twitter.com/noppefoxwolf/status/1672849798632976384?s=61&t=cwsZFMcBypoSq1n2DhTXeQ
         context.coordinator.openURLAction = context.environment.openURL
+        context.coordinator.textItemTagAction = context.environment.onTapTextItemTagAction
         return textView
     }
 
@@ -130,6 +131,7 @@ struct InternalTextView: UIViewRepresentable {
     class Coordinator: NSObject, UITextViewDelegate {
 
         var openURLAction: OpenURLAction? = nil
+        var textItemTagAction: OnTapTextItemTagAction? = nil
 
         func textView(
             _ textView: UITextView,
@@ -143,8 +145,10 @@ struct InternalTextView: UIViewRepresentable {
                 })
             case .textAttachment:
                 return nil
-            case .tag:
-                return nil
+            case .tag(let textItemTag):
+                return textItemTagAction.map { action in
+                    UIAction(handler: { _ in action(textItemTag) })
+                }
             @unknown default:
                 return nil
             }
