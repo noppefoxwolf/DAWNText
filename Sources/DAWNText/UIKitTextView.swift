@@ -3,7 +3,7 @@ import os
 
 public final class UIKitTextView: UITextView {
     var extraActions: [UIAction] = []
-    var selectionMode: SelectionMode = .all
+    var allowsSelectionTextItems: [TextItemType] = TextItemType.allCases
     var onCopy: ((NSAttributedString) -> Void)? = nil
 
     // workaround: When use init(usingTextLayoutManager:), property always return false.
@@ -97,10 +97,12 @@ public final class UIKitTextView: UITextView {
     }
 
     public override func point(inside point: CGPoint, with event: UIEvent?) -> Bool {
-        switch selectionMode {
-        case .all:
+        switch allowsSelectionTextItems {
+        case TextItemType.allCases:
             return super.point(inside: point, with: event)
-        case .linkOnly:
+        case []:
+            return false
+        default:
             // リンク以外のタップを無効
             guard let position = closestPosition(to: point) else {
                 return false
@@ -115,9 +117,16 @@ public final class UIKitTextView: UITextView {
                 return false
             }
             let startIndex = offset(from: beginningOfDocument, to: range.start)
-            return attributedText.attribute(.link, at: startIndex, effectiveRange: nil) != nil
-        case .none:
-            return false
+            return allowsSelectionTextItems.map { textItemType in
+                switch textItemType {
+                case .link:
+                    attributedText.attribute(.link, at: startIndex, effectiveRange: nil) != nil
+                case .tag:
+                    attributedText.attribute(.textItemTag, at: startIndex, effectiveRange: nil) != nil
+                case .textAttachment:
+                    attributedText.attribute(.attachment, at: startIndex, effectiveRange: nil) != nil
+                }
+            }.contains(true)
         }
     }
     

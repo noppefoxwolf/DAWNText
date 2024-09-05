@@ -3,7 +3,7 @@ import os
 
 public final class DummyTextView: UIView {
     var extraActions: [UIAction] = []
-    var selectionMode: SelectionMode = .all
+    var allowsSelectionTextItems: [TextItemType] = TextItemType.allCases
     var textContainerInset: UIEdgeInsets = .zero
     var contentInset: UIEdgeInsets = .zero
     var allowsEditingTextAttributes: Bool = false

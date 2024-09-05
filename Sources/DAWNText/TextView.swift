@@ -81,14 +81,13 @@ struct InternalTextView: UIViewRepresentable {
             context.environment.lineBreakMode ?? .byWordWrapping
         textView.textLayoutManager?.textContainer?.lineFragmentPadding =
             context.environment.lineFragmentPadding ?? 0
-        textView.selectionMode = context.environment.selectionMode
-        textView.isSelectable = context.environment.selectionMode != .none
+        textView.allowsSelectionTextItems = context.environment.allowsSelectionTextItems
+        textView.isSelectable = !context.environment.allowsSelectionTextItems.isEmpty
         textView.onCopy = context.environment.onCppy.map { action in
             { action(AttributedString($0)) }
         }
         
-
-        if context.environment.selectionMode != .all {
+        if context.environment.allowsSelectionTextItems != TextItemType.allCases {
             // Lightweight hack
             for subview in textView.subviews {
                 if "\(type(of: subview))" != "_UITextContainerView" {

@@ -73,27 +73,27 @@ extension View {
     }
 }
 
-public enum SelectionMode: Sendable {
-    case all
-    case linkOnly
-    case none
+public enum TextItemType: Sendable, CaseIterable {
+    case link
+    case textAttachment
+    case tag
 }
 
-private struct SelectionModeKey: EnvironmentKey {
-    static let defaultValue: SelectionMode = .all
+private struct AllowsSelectionTextItemsKey: EnvironmentKey {
+    static var defaultValue: [TextItemType] { TextItemType.allCases }
 }
 
 extension EnvironmentValues {
-    public var selectionMode: SelectionMode {
-        get { self[SelectionModeKey.self] }
-        set { self[SelectionModeKey.self] = newValue }
+    public var allowsSelectionTextItems: [TextItemType] {
+        get { self[AllowsSelectionTextItemsKey.self] }
+        set { self[AllowsSelectionTextItemsKey.self] = newValue }
     }
 }
 
 extension View {
     @ViewBuilder
-    public func selectionMode(_ mode: SelectionMode) -> some View {
-        environment(\.selectionMode, mode)
+    public func allowsSelectionTextItems(_ types: [TextItemType] = TextItemType.allCases) -> some View {
+        environment(\.allowsSelectionTextItems, types)
     }
 }
 
