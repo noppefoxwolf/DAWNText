@@ -9,13 +9,7 @@ public struct TextViewSizeCacheKey: Hashable {
 
 public typealias TextViewSizeCache = AnyCache<TextViewSizeCacheKey, CGSize>
 
-private struct TextViewSizeCacheEnvironmentKey: EnvironmentKey {
-    static let defaultValue: TextViewSizeCache = TextViewSizeCache(base: OnMemoryCache())
-}
-
 extension EnvironmentValues {
-    public var textViewSizeCache: TextViewSizeCache {
-        get { self[TextViewSizeCacheEnvironmentKey.self] }
-        set { self[TextViewSizeCacheEnvironmentKey.self] = newValue }
-    }
+    @Entry
+    public var textViewSizeCache: TextViewSizeCache = TextViewSizeCache(base: OnMemoryCache())
 }
