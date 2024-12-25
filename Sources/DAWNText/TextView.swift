@@ -1,8 +1,6 @@
 import SwiftUI
 import UIKit
 
-extension NSParagraphStyle: @unchecked Sendable {}
-
 public struct TextView: View {
     public init(
         _ attributedString: AttributedString
@@ -66,13 +64,17 @@ struct InternalTextView: UIViewRepresentable {
         textView.extraActions = context.environment.extraActions
 
         var attributedString = attributedString
-        attributedString.font = context.environment.uiFont
+        
         let paragraphStyle = NSMutableParagraphStyle()
         paragraphStyle.alignment = .init(context.environment.multilineTextAlignment)
-        attributedString.paragraphStyle = paragraphStyle
+        var attributeContainer = AttributeContainer([
+            .font : context.environment.uiFont,
+            .paragraphStyle : paragraphStyle
+        ])
+        
         // FIXME: NSAttributedStringの生成が重い
         textView.attributedText = try! NSAttributedString(
-            attributedString,
+            attributedString.mergingAttributes(attributeContainer),
             including: \.uiKit
         )
         textView.textLayoutManager?.textContainer?.maximumNumberOfLines =
