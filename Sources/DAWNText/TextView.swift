@@ -62,12 +62,10 @@ struct InternalTextView: UIViewRepresentable {
     func updateUIView(_ textView: UIViewType, context: Context) {
         //        logger.info("\(#function) \(attributedString.description.prefix(10))")
         textView.extraActions = context.environment.extraActions
-
-        var attributedString = attributedString
         
         let paragraphStyle = NSMutableParagraphStyle()
         paragraphStyle.alignment = .init(context.environment.multilineTextAlignment)
-        var attributeContainer = AttributeContainer([
+        let attributeContainer = AttributeContainer([
             .font : context.environment.uiFont,
             .paragraphStyle : paragraphStyle
         ])
@@ -112,24 +110,21 @@ struct InternalTextView: UIViewRepresentable {
         // workaround: Layout側でキャッシュしてもsizeThatFitsが呼ばれるのでCoordinatorで設定する
         let attributedStringHashValue = attributedString.hashValue
         let fontHashValue = context.environment.uiFont.hashValue
+        let numberOfLines = context.environment.lineLimit ?? 0
         let cacheKey = TextViewSizeCacheKey(
             width: width,
             attributedStringHashValue: attributedStringHashValue,
-            fontHashValue: fontHashValue
+            fontHashValue: fontHashValue,
+            numberOfLines: numberOfLines
         )
-        if let size = context.environment.textViewSizeCache[cacheKey] {
+        let retriever = TextViewSizeCacheRetriever(cache: context.environment.textViewSizeCache)
+        if let size = retriever.sizeThatFits(cacheKey) {
             return size
         } else {
-            let intrinsicContentSizeCacheKey = context.environment.textViewSizeCache.keys.filter { $0.attributedStringHashValue == attributedStringHashValue && $0.fontHashValue == fontHashValue }.first(where: { $0.width == 0 })
-            let proposalWidth = proposal.width ?? 0
-            if let intrinsicContentSizeCacheKey, intrinsicContentSizeCacheKey.width < proposalWidth {
-                return context.environment.textViewSizeCache[intrinsicContentSizeCacheKey]!
-            } else {
-                let proposalSize = CGSize(width: proposalWidth, height: 0)
-                let size = uiView.sizeThatFits(proposalSize)
-                context.environment.textViewSizeCache[cacheKey] = size
-                return size
-            }
+            let proposalSize = CGSize(width: width, height: 0)
+            let size = uiView.sizeThatFits(proposalSize)
+            context.environment.textViewSizeCache[cacheKey] = size
+            return size
         }
     }
 
