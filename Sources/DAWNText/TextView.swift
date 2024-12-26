@@ -1,7 +1,8 @@
 import SwiftUI
 import UIKit
+import os
 
-public struct TextView: View {
+public struct TextView: UIViewRepresentable {
     public init(
         _ attributedString: AttributedString
     ) {
@@ -9,49 +10,36 @@ public struct TextView: View {
     }
 
     let attributedString: AttributedString
+    
 
-    @Environment(\.uiFont)
-    var uiFont
+    let logger = Logger(
+        subsystem: Bundle.main.bundleIdentifier!,
+        category: #file
+    )
 
-    public var body: some View {
-        // workaround: 横幅を取得するためにsizeThatFitsでくくる
-        ViewThatFits(in: .horizontal) {
-            InternalTextView(
-                attributedString: attributedString
-            )
-        }
-    }
-}
+    public typealias UIViewType = UIKitTextView
 
-struct InternalTextView: UIViewRepresentable {
-    init(
-        attributedString: AttributedString
-    ) {
-        self.attributedString = attributedString
-    }
-
-    let attributedString: AttributedString
-
-    typealias UIViewType = UIKitTextView
-    //    typealias UIViewType = DummyTextView
-
-    func makeUIView(context: Context) -> UIViewType {
-        // updateは頻繁に呼ばれたりするので
-        let textView = UIViewType(usingTextLayoutManager: true)
-        textView.backgroundColor = .clear
-        textView.textContainerInset = .zero
-        textView.contentInset = .zero
+    public func makeUIView(context: Context) -> UIViewType {
+        // Setup
+        let textView = UIViewType()
+        textView.delegate = context.coordinator
         textView.allowsEditingTextAttributes = true
         textView.isEditable = false
+        
+        // Layout
+        textView.textContainerInset = .zero
+        textView.contentInset = .zero
         textView.isScrollEnabled = false
-        textView.showsVerticalScrollIndicator = false
-        textView.showsHorizontalScrollIndicator = false
         textView.textContainer.lineFragmentPadding = 0
         textView.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
         textView.setContentCompressionResistancePriority(.defaultLow, for: .vertical)
         textView.setContentHuggingPriority(.defaultHigh, for: .horizontal)
         textView.setContentHuggingPriority(.defaultHigh, for: .vertical)
-        textView.delegate = context.coordinator
+        
+        // Apparance
+        textView.backgroundColor = .clear
+        textView.showsVerticalScrollIndicator = false
+        textView.showsHorizontalScrollIndicator = false
 
         // https://twitter.com/noppefoxwolf/status/1672849798632976384?s=61&t=cwsZFMcBypoSq1n2DhTXeQ
         context.coordinator.openURLAction = context.environment.openURL
@@ -59,15 +47,15 @@ struct InternalTextView: UIViewRepresentable {
         return textView
     }
 
-    func updateUIView(_ textView: UIViewType, context: Context) {
-        //        logger.info("\(#function) \(attributedString.description.prefix(10))")
+    public func updateUIView(_ textView: UIViewType, context: Context) {
         textView.extraActions = context.environment.extraActions
         
         let paragraphStyle = NSMutableParagraphStyle()
         paragraphStyle.alignment = .init(context.environment.multilineTextAlignment)
+        paragraphStyle.lineSpacing = context.environment.lineSpacing
         let attributeContainer = AttributeContainer([
             .font : context.environment.uiFont,
-            .paragraphStyle : paragraphStyle
+            .paragraphStyle : paragraphStyle,
         ])
         
         // FIXME: NSAttributedStringの生成が重い
@@ -102,11 +90,15 @@ struct InternalTextView: UIViewRepresentable {
         }
     }
 
-    func sizeThatFits(_ proposal: ProposedViewSize, uiView: UIViewType, context: Context)
+    public func sizeThatFits(_ proposal: ProposedViewSize, uiView: UIViewType, context: Context)
         -> CGSize?
     {
         // guard zero, infinity and Nan
-        guard let width = proposal.width, width.isNormal else { return nil }
+        guard let proposalWidth = proposal.width, proposalWidth.isNormal else { return nil }
+        func nearestEvenMultiple(of number: Double) -> Double {
+            round(number / 2) * 2
+        }
+        let width = nearestEvenMultiple(of: proposalWidth)
         // workaround: Layout側でキャッシュしてもsizeThatFitsが呼ばれるのでCoordinatorで設定する
         let attributedStringHashValue = attributedString.hashValue
         let fontHashValue = context.environment.uiFont.hashValue
@@ -121,6 +113,7 @@ struct InternalTextView: UIViewRepresentable {
         if let size = retriever.sizeThatFits(cacheKey) {
             return size
         } else {
+            logger.debug("sizeThatFits: \(NSAttributedString(attributedString).string.prefix(10)) \(cacheKey.width)")
             let proposalSize = CGSize(width: width, height: 0)
             let size = uiView.sizeThatFits(proposalSize)
             context.environment.textViewSizeCache[cacheKey] = size
@@ -128,16 +121,16 @@ struct InternalTextView: UIViewRepresentable {
         }
     }
 
-    func makeCoordinator() -> Coordinator {
+    public func makeCoordinator() -> Coordinator {
         Coordinator()
     }
 
-    class Coordinator: NSObject, UITextViewDelegate {
+    public final class Coordinator: NSObject, UITextViewDelegate {
 
         var openURLAction: OpenURLAction? = nil
         var textItemTagAction: OnTapTextItemTagAction? = nil
 
-        func textView(
+        public func textView(
             _ textView: UITextView,
             primaryActionFor textItem: UITextItem,
             defaultAction: UIAction
