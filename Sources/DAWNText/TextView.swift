@@ -110,18 +110,26 @@ struct InternalTextView: UIViewRepresentable {
         // guard zero, infinity and Nan
         guard let width = proposal.width, width.isNormal else { return nil }
         // workaround: Layout側でキャッシュしてもsizeThatFitsが呼ばれるのでCoordinatorで設定する
+        let attributedStringHashValue = attributedString.hashValue
+        let fontHashValue = context.environment.uiFont.hashValue
         let cacheKey = TextViewSizeCacheKey(
             width: width,
-            attributedStringHashValue: attributedString.hashValue,
-            fontHashValue: context.environment.uiFont.hashValue
+            attributedStringHashValue: attributedStringHashValue,
+            fontHashValue: fontHashValue
         )
         if let size = context.environment.textViewSizeCache[cacheKey] {
             return size
         } else {
-            let proposalSize = CGSize(width: proposal.width ?? 0, height: 0)
-            let size = uiView.sizeThatFits(proposalSize)
-            context.environment.textViewSizeCache[cacheKey] = size
-            return size
+            let intrinsicContentSizeCacheKey = context.environment.textViewSizeCache.keys.filter { $0.attributedStringHashValue == attributedStringHashValue && $0.fontHashValue == fontHashValue }.first(where: { $0.width == 0 })
+            let proposalWidth = proposal.width ?? 0
+            if let intrinsicContentSizeCacheKey, intrinsicContentSizeCacheKey.width < proposalWidth {
+                return context.environment.textViewSizeCache[intrinsicContentSizeCacheKey]!
+            } else {
+                let proposalSize = CGSize(width: proposalWidth, height: 0)
+                let size = uiView.sizeThatFits(proposalSize)
+                context.environment.textViewSizeCache[cacheKey] = size
+                return size
+            }
         }
     }
 
