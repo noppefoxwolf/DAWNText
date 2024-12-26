@@ -11,7 +11,6 @@ public struct TextView: UIViewRepresentable {
 
     let attributedString: AttributedString
     
-
     let logger = Logger(
         subsystem: Bundle.main.bundleIdentifier!,
         category: #file
@@ -94,7 +93,7 @@ public struct TextView: UIViewRepresentable {
         -> CGSize?
     {
         // guard zero, infinity and Nan
-        guard let proposalWidth = proposal.width, proposalWidth.isNormal else { return nil }
+        guard let proposalWidth = proposal.width, proposalWidth.isNormal else { return .zero }
         func nearestEvenMultiple(of number: Double) -> Double {
             round(number / 2) * 2
         }
@@ -113,7 +112,6 @@ public struct TextView: UIViewRepresentable {
         if let size = retriever.sizeThatFits(cacheKey) {
             return size
         } else {
-            logger.debug("sizeThatFits: \(NSAttributedString(attributedString).string.prefix(10)) \(cacheKey.width)")
             let proposalSize = CGSize(width: width, height: 0)
             let size = uiView.sizeThatFits(proposalSize)
             context.environment.textViewSizeCache[cacheKey] = size

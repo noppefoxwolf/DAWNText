@@ -1,22 +1,34 @@
 import Foundation
+import os
 
 struct TextViewSizeCacheRetriever {
     let cache: TextViewSizeCache
+    let logger = Logger(
+        subsystem: Bundle.main.bundleIdentifier!,
+        category: #file
+    )
     
     func sizeThatFits(_ key: TextViewSizeCacheKey) -> CGSize? {
+        // 1. 一致する
         if let size = cache[key] {
             return size
         }
         let equalTypographyCacheKeys = cache.keys.filter { $0.isEqualTypography(to: key) }
         let intrinsicContentSizeCacheKey = equalTypographyCacheKeys.first(where: { $0.width == 0 })
         
-        if let intrinsicContentSizeCacheKey, let cachedSize = cache[intrinsicContentSizeCacheKey], cachedSize.width < key.width {
-            return cachedSize
-        } else if key.numberOfLines == 1, let k = equalTypographyCacheKeys.first(where: { $0.width < key.width }), k.width <= key.width {
-            return cache[k]
-        } else {
-            return nil
+        // 2. intrinsicContentSizeのキャッシュがある場合、key.widthより小さいなら採用する
+        if let intrinsicContentSizeCacheKey, let size = cache[intrinsicContentSizeCacheKey] {
+            if size.width.rounded(.down) <= key.width {
+                return size
+            }
         }
+        // 3. 1行の場合、すでにkey.widthより小さいキャッシュがあるなら採用する
+        if key.numberOfLines == 1, let nearestCacheKey = equalTypographyCacheKeys.first(where: { $0.width < key.width }) {
+            if nearestCacheKey.width <= key.width {
+                return cache[nearestCacheKey]
+            }
+        }
+        return nil
     }
 }
 
