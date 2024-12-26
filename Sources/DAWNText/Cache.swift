@@ -5,11 +5,11 @@ public protocol Cache: AnyObject {
     associatedtype Value
     
     subscript(key: Key) -> Value? { get set }
-    var keys: [Key] { get }
+    var keys: Set<Key> { get }
 }
 
 public final class AnyCache<Key: Hashable, Value>: Cache {
-    let keysGetter: () -> [Key]
+    let keysGetter: () -> Set<Key>
     let getter: (Key) -> Value?
     let setter: (Key, Value?) -> Void
     
@@ -19,7 +19,7 @@ public final class AnyCache<Key: Hashable, Value>: Cache {
         setter = { base[$0] = $1 }
     }
     
-    public var keys: [Key] { keysGetter() }
+    public var keys: Set<Key> { keysGetter() }
     
     public subscript(key: Key) -> Value? {
         get { getter(key) }
@@ -28,7 +28,7 @@ public final class AnyCache<Key: Hashable, Value>: Cache {
 }
 
 final class OnMemoryCache<Key: Hashable, Value>: Cache {
-    var keys: [Key] { cache.keys.map(\.self) }
+    var keys: Set<Key> { Set(cache.keys) }
     var cache: [Key : Value] = [:]
     
     subscript(key: Key) -> Value? {
