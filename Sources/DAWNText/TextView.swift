@@ -110,11 +110,12 @@ public struct TextView: UIViewRepresentable {
         )
         let retriever = TextViewSizeCacheRetriever(cache: context.environment.textViewSizeCache)
         if let size = retriever.sizeThatFits(cacheKey) {
-            return size
+            return CGSize(width: size.width, height: size.height)
         } else {
             let proposalSize = CGSize(width: width, height: 0)
             let size = uiView.sizeThatFits(proposalSize)
-            context.environment.textViewSizeCache[cacheKey] = size
+            let value = TextViewSizeCacheValue(width: size.width, height: size.height)
+            context.environment.textViewSizeCache[cacheKey] = value
             return size
         }
     }

@@ -8,7 +8,12 @@ public struct TextViewSizeCacheKey: Sendable, Hashable {
     let numberOfLines: Int
 }
 
-public typealias TextViewSizeCache = AnyCache<TextViewSizeCacheKey, CGSize>
+public struct TextViewSizeCacheValue: Sendable {
+    let width: Double
+    let height: Double
+}
+
+public typealias TextViewSizeCache = AnyCache<TextViewSizeCacheKey, TextViewSizeCacheValue>
 
 extension EnvironmentValues {
     @Entry

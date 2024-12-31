@@ -8,7 +8,7 @@ struct TextViewSizeCacheRetriever: Sendable {
         category: #file
     )
     
-    func sizeThatFits(_ key: TextViewSizeCacheKey) -> CGSize? {
+    func sizeThatFits(_ key: TextViewSizeCacheKey) -> TextViewSizeCacheValue? {
         // 1. 一致する
         if let size = cache[key] {
             return size
