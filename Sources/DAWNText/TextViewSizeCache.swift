@@ -5,6 +5,7 @@ public struct TextViewSizeCacheKey: Hashable {
     let width: Double
     let attributedStringHashValue: Int
     let fontHashValue: Int
+    let numberOfLines: Int
 }
 
 public typealias TextViewSizeCache = AnyCache<TextViewSizeCacheKey, CGSize>
