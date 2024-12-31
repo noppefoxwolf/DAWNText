@@ -1,7 +1,7 @@
 import Foundation
 import SwiftUI
 
-public struct TextViewSizeCacheKey: Hashable {
+public struct TextViewSizeCacheKey: Sendable, Hashable {
     let width: Double
     let attributedStringHashValue: Int
     let fontHashValue: Int

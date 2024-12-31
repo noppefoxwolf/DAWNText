@@ -1,7 +1,7 @@
 import Foundation
 import os
 
-struct TextViewSizeCacheRetriever {
+struct TextViewSizeCacheRetriever: Sendable {
     let cache: TextViewSizeCache
     let logger = Logger(
         subsystem: Bundle.main.bundleIdentifier!,
