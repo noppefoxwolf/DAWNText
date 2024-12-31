@@ -28,7 +28,11 @@ public final class AnyCache<Key: Sendable & Hashable, Value: Sendable>: Cache, S
 }
 
 final class OnMemoryCache<Key: Sendable & Hashable, Value: Sendable>: Cache, @unchecked Sendable {
-    var keys: Set<Key> { Set(cache.keys) }
+    var keys: Set<Key> {
+        queue.sync {
+            Set(cache.keys)
+        }
+    }
     
     let queue = DispatchQueue(label: "queue", attributes: .concurrent)
     
